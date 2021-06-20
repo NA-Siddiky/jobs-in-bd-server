@@ -1,66 +1,64 @@
-const express = require("express");
-const cors = require("cors");
-const ObjectID = require("mongodb").ObjectID;
-const MongoClient = require("mongodb").MongoClient;
+const express = require('express');
+const cors = require('cors');
+
 const app = express();
-require("dotenv").config();
+require('dotenv').config()
 
-const port = process.env.PORT || 5000;
-
-
-
-//middlewire here
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req, res) => {
-    res.send("Welcome! To the Server...");
-});
-const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
 
-client.connect((err) => {
-    const productCollection = client.db("AmarDokan").collection("products");
-    // perform actions on the collection object
+const MongoClient = require('mongodb').MongoClient;
 
-    app.post('/addUser', async (req, res) => {
-        const user = req.body;
-        const { email } = user;
-        usersCollection.findOne({ email }, (err, data) => {
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ylija.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-        })
+client.connect(err => {
+    const userList = client.db("jobsBoard").collection("userList");
+    const jobList = client.db("jobsBoard").collection("jobList");
+
+    app.post("/register", (req, res) => {
+        console.log(req.body);
+        userList.insertOne(req.body)
+            .then(result => {
+                console.log(result);
+                res.send(result.insertedCount > 0)
+            })
     })
 
-    // all products
-    app.get("/products", (req, res) => {
-        productCollection.find({}).toArray((err, items) => {
-            res.send(items);
-        });
-    });
+    app.get('/userInfo', (req, res) => {
+        console.log(req.query.email);
+        console.log(req.body);
+        userList.find({ email: req.query.email })
+            .toArray((error, result) => {
+                console.log(error);
+                console.log(result);
+                res.send(result)
+            })
+    })
 
-    // single product by id
-    app.get("/products/:id", (req, res) => {
-        productCollection
-            .find({ _id: ObjectID(req.params.id) })
-            .toArray((err, documents) => {
-                res.send(documents[0]);
-            });
-    });
+    app.post('/addJob', (req, res) => {
+        jobList.insertOne(req.body)
+            .then((result) => {
+                console.log(result);
+                res.send(result.insertedCount > 0)
+            })
+    })
 
-    //add all products to database
-    app.post("/addProducts", (req, res) => {
-        const options = { ordered: true };
-        productCollection.insertMany(req.body, options).then((result) => {
-            // console.log(`${result.insertedCount} documents were inserted`);
-            res.send(result.insertedCount > 0);
-        });
-    });
+    app.get('/allJobs', (req, res) => {
+        jobList.find({})
+            .toArray((error, result) => {
+                console.log(error);
+                console.log(result);
+                res.send(result)
+            })
+    })
+
 });
 
+app.get('/', (req, res) => {
+    res.send('Database connect successfully')
+})
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
-});
+app.listen(process.env.PORT || 5000);
