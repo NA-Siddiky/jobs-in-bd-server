@@ -15,7 +15,8 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
 
-    const userList = client.db("jobs-in-bd").collection("all-jobs");
+    const userList = client.db("jobs-in-bd").collection("all-users");
+    const jobList = client.db("jobs-in-bd").collection("all-jobs");
 
     app.post("/register", (req, res) => {
         const userInfo = req.body;
@@ -26,12 +27,27 @@ client.connect(err => {
             })
     })
 
-    app.get('/login', (req, res) => {
+    app.get('/userInfo', (req, res) => {
         console.log(req.query.email);
         userList.find({ email: req.query.email })
             .toArray((err, result) => {
                 console.log(result);
                 res.send(result[0])
+            })
+    })
+
+    app.post('/addJob', (req, res) => {
+        jobList.insertOne(req.body)
+            .then((result) => {
+                console.log(result);
+            })
+    })
+
+    app.get('/allJobs', (req, res) => {
+        jobList.find({})
+            .toArray((err, result) => {
+                console.log(err, result);
+                res.send(result)
             })
     })
 
