@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-
+const ObjectID = require('mongodb').ObjectID
 const app = express();
 require('dotenv').config()
 
@@ -48,6 +48,25 @@ client.connect(err => {
             .toArray((err, result) => {
                 console.log(err, result);
                 res.send(result)
+            })
+    })
+
+    app.patch('/update/:id', (req, res) => {
+        const id = ObjectID(req.params.id)
+        const body = req.body
+
+        console.log(id, body);
+
+        jobList.findOneAndUpdate(
+            { _id: id },
+            { $set: { status: body.status } }
+        )
+            .then(result => {
+                console.log(result);
+                res.send(result.ok > 0)
+            })
+            .catch(err => {
+                console.log(err);
             })
     })
 
