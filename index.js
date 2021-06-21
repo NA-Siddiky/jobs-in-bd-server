@@ -7,7 +7,6 @@ require('dotenv').config()
 app.use(express.json());
 app.use(cors());
 
-
 const MongoClient = require('mongodb').MongoClient;
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ylija.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -89,7 +88,7 @@ client.connect(err => {
 })
 
 app.get('/', (req, res) => {
-    res.send('Database connect successfully')
+    res.send('Database connected')
 })
 
 app.listen(process.env.PORT || 5000);
