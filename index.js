@@ -17,6 +17,7 @@ client.connect(err => {
 
     const userList = client.db("jobs-in-bd").collection("all-users");
     const jobList = client.db("jobs-in-bd").collection("all-jobs");
+    const categoryList = client.db("jobs-in-bd").collection("category-list");
 
     app.post("/register", (req, res) => {
         const userInfo = req.body;
@@ -67,6 +68,21 @@ client.connect(err => {
             })
             .catch(err => {
                 console.log(err);
+            })
+    })
+
+    app.post('/addCategory', (req, res) => {
+        console.log(req.body);
+        categoryList.insertOne(req.body)
+            .then(result => {
+                console.log(result);
+            })
+    })
+
+    app.get('/category', (req, res) => {
+        categoryList.find({})
+            .toArray((err, result) => {
+                res.send(result)
             })
     })
 
